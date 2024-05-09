@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.10.001">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.10.001" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="retrieve" compatibility="9.10.001" expanded="true" height="68" name="Retrieve Last30data_ASII_neuralnetwork" width="90" x="45" y="34">
+        <parameter key="repository_entry" value="Last30data_ASII_neuralnetwork"/>
+      </operator>
+      <operator activated="true" class="set_role" compatibility="9.10.001" expanded="true" height="82" name="Set Role" width="90" x="179" y="34">
+        <parameter key="attribute_name" value="Close - 0"/>
+        <parameter key="target_role" value="label"/>
+        <list key="set_additional_roles">
+          <parameter key="Close - 0" value="label"/>
+        </list>
+      </operator>
+      <operator activated="true" class="series:fit_trend" compatibility="7.4.000" expanded="true" height="68" name="Fit Trend" width="90" x="313" y="34">
+        <parameter key="attribute" value="Close - 0"/>
+        <parameter key="keep_original_attribute" value="true"/>
+        <process expanded="true">
+          <operator activated="true" class="neural_net" compatibility="9.10.001" expanded="true" height="82" name="Neural Net" width="90" x="112" y="34">
+            <list key="hidden_layers">
+              <parameter key="1" value="7"/>
+            </list>
+            <parameter key="training_cycles" value="200"/>
+            <parameter key="learning_rate" value="0.01"/>
+            <parameter key="momentum" value="0.9"/>
+            <parameter key="decay" value="false"/>
+            <parameter key="shuffle" value="true"/>
+            <parameter key="normalize" value="true"/>
+            <parameter key="error_epsilon" value="1.0E-4"/>
+            <parameter key="use_local_random_seed" value="false"/>
+            <parameter key="local_random_seed" value="1992"/>
+          </operator>
+          <connect from_port="example set" to_op="Neural Net" to_port="training set"/>
+          <connect from_op="Neural Net" from_port="model" to_port="model"/>
+          <portSpacing port="source_example set" spacing="0"/>
+          <portSpacing port="sink_model" spacing="0"/>
+        </process>
+      </operator>
+      <connect from_op="Retrieve Last30data_ASII_neuralnetwork" from_port="output" to_op="Set Role" to_port="example set input"/>
+      <connect from_op="Set Role" from_port="example set output" to_op="Fit Trend" to_port="example set"/>
+      <connect from_op="Fit Trend" from_port="example set with trend" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+    </process>
+  </operator>
+</process>
